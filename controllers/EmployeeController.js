@@ -179,8 +179,57 @@ const get = async (req, res) => {
   return res.status(200).send(makeRes('Movement logs retrieved.', { EmployeeList }));
 }
 
+/**
+ * Delete employee using rfid.
+ * 
+ * @param {Object} req
+ * @param {Object} req.user
+ * @param {Object} req.user.id
+ * @param {Object} req.params
+ * @param {Object} req.params.rfid
+ * @param {Object} res 
+ */
+ const Delete = async (req, res) => {
+  let err, employee;
+  [err, employee] = await to(Employee.destroy({
+    where: {
+      rfid: req.body.rfid
+    },
+    include: [
+      {
+        model: Organization,
+        as: 'organization',
+        attributes: ['name'],
+        required: true,
+        include: [
+          {
+            model: User,
+            as: 'users',
+            attributes: [],
+            where: {
+              id: req.user.id
+            }
+          }
+        ]
+      }
+    ]
+  }));
+
+  if (err) {
+    console.log(err);
+    return res.status(500).send(makeRes('Something went wrong.'));
+  }
+
+  if (!employee) {
+    return res.status(404).send(makeRes('Employee not found.'));
+  }
+
+  return res.status(200).send(makeRes('Employee details retrieved.', { employee }));
+}
+
 module.exports = {
   create,
   get,
-  listEmployees
+  listEmployees,
+  Delete
 };

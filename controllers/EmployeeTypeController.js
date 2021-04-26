@@ -1,4 +1,4 @@
-const { User, EmployeeType} = require('../models');
+const { User, EmployeeType, Organization} = require('../models');
 const { makeRes, to, filterErrors } = require('../utils/helpers');
 
 /**
@@ -66,8 +66,9 @@ const create = async (req, res) => {
   }));
 
   if (err) {
+    console,log(savedEmployeeType);
     console.log(err);
-    return res.status(500).send(makeRes('Unable to add new Employee type info.', {
+    return res.status(500).send(makeRes('Unable to add new Employee type info.1', {
       errors: err.errors ? filterErrors(err.errors) : null
     }));
   }
@@ -75,7 +76,7 @@ const create = async (req, res) => {
   [err, organization] = await to(organization.addEmployeetypeInfo(savedEmployeeType));
 
   if (err) {
-    return res.status(500).send(makeRes('Unable to add new Employee type info.'));
+    return res.status(500).send(makeRes('Unable to add new Employee type info.2'));
   }
 
   return res.status(200).send(makeRes(` Employee type details added to ${organization.name}`, {
@@ -84,49 +85,49 @@ const create = async (req, res) => {
 }
 
 /**
- * Get employee type details.
+ * List Employee Type Details.
  * 
  * @param {Object} req
- * @param {Object} req.user
- * @param {Object} req.user.id
  * @param {Object} req.params
- * @param {Object} req.params.employeeId
+ * @param {Object} req.params.organizationId
  * @param {Object} res 
  */
  const get = async (req, res) => {
-  let err, employeetype;
-  [err, employeetype] = await to(Employee.findOne({
-    attributes: ['id', 'organizationId', 'Employee_type', 'createdAt', 'updatedAt'],
-    include: [
-      {
-        model: Organization,
-        as: 'organization',
-        attributes: ['name'],
-        required: true,
-        include: [
-          {
-            model: User,
-            as: 'users',
-            attributes: [],
-            where: {
-              id: req.user.id
-            }
-          }
-        ]
-      }
-    ]
+  // Find organization
+  let err, organizations;
+  [err, organizations] = await to(req.user.getOrganizations({
+    where: {
+      id: req.params.organizationId
+    }
   }));
 
   if (err) {
     return res.status(500).send(makeRes('Something went wrong.'));
   }
 
-  if (!employeetype) {
-    return res.status(404).send(makeRes('Employee type not found.'));
+  if (!organizations || organizations.length <= 0) {
+    return res.status(400).send(makeRes('Organization not found.'));
   }
 
-  return res.status(200).send(makeRes('Employee type details retrieved.', { employeetype }));
+  let organization = organizations[0];
+
+  let EmployeeType;
+  [err, EmployeeType] = await to(EmployeeType.findAll({
+    attributes: ['id', 'organizationId', 'Employee_type', 'createdAt', 'updatedAt'],
+    
+    order: [
+      ['createdAt', 'DESC']
+    ]
+  }));
+
+  if (err) {
+    console.log(err);
+    return res.status(500).send(makeRes('Something went wrong.'));
+  }
+
+  return res.status(200).send(makeRes('Employee Type details retrieved.', { EmployeeType}));
 }
+
 
 
 module.exports = {

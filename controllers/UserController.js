@@ -127,23 +127,17 @@ const login = async (req, res) => {
  */
 const get = async (req, res) => {
   let err, user;
-  [err, user] = await to(User.findOne({
+  [err, user] = await to(User.findAll({
     attributes: [
       'id',
       'firstName',
       'lastName',
       'email',
     ],
-    where: {
-      id: req.user.id,
-    },
-    include: [
-      {
-        model: Organization,
-        as: 'organizations',
-        attributes: ['id', 'name'],
-      },
-    ],
+    order: [
+      ['id', 'DESC']
+    ]
+    
   }));
 
   if (err || !user) {

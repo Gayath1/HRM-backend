@@ -1,4 +1,4 @@
-const { User, OTDetails } = require('../models');
+const { User, OTDetails,Organization } = require('../models');
 const { makeRes, to, filterErrors } = require('../utils/helpers');
 
 /**
@@ -62,7 +62,7 @@ const create = async (req, res) => {
   // Save shift
   let savedOTDetails;
   [err, savedOTDetails] = await to(OTDetailsInstance.save({
-    fields: ['employeeType', 'otHrsMin', 'incharge_email', 'otHrsMax', 'otRate']
+    fields: ['employeeTypeId', 'otHrsMin', 'incharge_email', 'otHrsMax', 'otRate']
   }));
 
   if (err) {
@@ -129,8 +129,106 @@ const create = async (req, res) => {
   return res.status(200).send(makeRes('Movement logs retrieved.', { OtDetails }));
 }
 
+/**
+ * Delete eOTdetails using id.
+ * 
+ * @param {Object} req
+ * @param {Object} req.user
+ * @param {Object} req.user.id
+ * @param {Object} req.params
+ * @param {Object} req.params.id
+ * @param {Object} res 
+ */
+ const deleteOT = async (req, res) => {
+  let err, otDelete;
+  [err, otDelete] = await to(OTDetails.destroy({
+    where: {
+      id: req.body.id
+    },
+    include: [
+      {
+        model: organizations,
+        as: 'organization',
+        attributes: ['name'],
+        required: true,
+        include: [
+          {
+            model: User,
+            as: 'users',
+            attributes: [],
+            where: {
+              id: req.user.id
+            }
+          }
+        ]
+      }
+    ]
+  }));
 
+  if (err) {
+    console.log(err);
+    return res.status(500).send(makeRes('Something went wrong.'));
+  }
+
+  if (!otDelete) {
+    return res.status(404).send(makeRes('Ovetime Info not found.'));
+  }
+
+  return res.status(200).send(makeRes('Overtime details deleted.', { otDelete }));
+}
+
+/**
+ * Delete shift using id.
+ * 
+ * @param {Object} req
+ * @param {Object} req.user
+ * @param {Object} req.user.id
+ * @param {Object} req.params
+ * @param {Object} req.params.id
+ * @param {Object} req.params.organizationId
+ * @param {Object} res 
+ */
+ const Delete = async (req, res) => {
+
+  let err, OTDetail;
+  [err, OTDetail] = await to(OTDetails.destroy({
+    where: {
+      id: req.body.id
+    },
+    include: [
+      {
+        model: Organization,
+        as: 'organization',
+        attributes: ['name'],
+        required: true,
+        include: [
+          {
+            model: User,
+            as: 'users',
+            attributes: [],
+            where: {
+              id: req.user.id
+            }
+          }
+        ]
+      }
+    ]
+  }));
+
+  if (err) {
+
+    return res.status(500).send(makeRes('Something went wrong.'));
+  }
+
+  if (!OTDetail) {
+    return res.status(404).send(makeRes('OTDetail not found.'));
+  }
+
+  return res.status(200).send(makeRes('OT details deleted.', { OTDetail}));
+}
 module.exports = {
   create,
-  listOT
+  listOT,
+  deleteOT,
+  Delete
 };

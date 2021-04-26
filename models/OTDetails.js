@@ -12,11 +12,13 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       OTDetails.belongsTo(models.EmployeeType, {
+        as: 'employeeType',
         foreignKey: 'employeeTypeId',
-        as: 'employeeType'
       });
-
-     
+      OTDetails.belongsTo(models.Organization, {
+        foreignKey: 'organizationId',
+        as: 'organization'
+      });
 
     }
   };

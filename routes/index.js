@@ -35,6 +35,7 @@ router.get('/organizations/:organizationId/summary', passport.authenticate('jwt-
 router.post('/organizations/:organizationId/employees', passport.authenticate('jwt-user', { session: false }), EmployeeController.create);
 router.get('/employees/:employeeId', passport.authenticate('jwt-user', { session: false }), EmployeeController.get);
 router.get('/organizations/:organizationId/employeeslist', passport.authenticate('jwt-user', { session: false }), EmployeeController.listEmployees);
+router.post('/organizations/:organizationId/employeeslist/delete', passport.authenticate('jwt-user', { session: false }), EmployeeController.Delete);
 
 // locations
 router.post('/organizations/:organizationId/locations', passport.authenticate('jwt-user', { session: false }), LocationController.create);
@@ -56,7 +57,7 @@ router.get('/organizations/:organizationId/movements/flagged', passport.authenti
 
 // employee types
 router.post('/organizations/:organizationId/employeetypes', passport.authenticate('jwt-user', { session: false }), EmployeeTypeController.create);
-router.get('/organizations/:organizationId/employeetypes',  EmployeeTypeController.get);
+router.get('/organizations/:organizationId/employeetypes/list',  EmployeeTypeController.get);
 
 // overtime
 router.post('/organizations/:organizationId/overtime', passport.authenticate('jwt-user', { session: false }), OTDetailsController.create);
@@ -65,11 +66,12 @@ router.get('/employees/:employeeId/overtime', passport.authenticate('jwt-user', 
 router.post('/organizations/:organizationId/overtime/update', passport.authenticate('jwt-user', { session: false }), MovementLogController.updateOTLogStatus);
 router.get('/organizations/:organizationId/overtime/all', passport.authenticate('jwt-user', { session: false }), MovementLogController.listAllOT);
 router.get('/organizations/:organizationId/movements/pendingOT', passport.authenticate('jwt-user', { session: false }), MovementLogController.pendingOTList);
-
+router.post('/organizations/:organizationId/overtime/Delete', passport.authenticate('jwt-user', { session: false }), OTDetailsController.Delete);
 
 //shift
 router.post('/organizations/:organizationId/shift', passport.authenticate('jwt-user', { session: false }), shiftController.create);
-router.get('/organizations/:organizationId/shifttypes',  shiftController.listShift);
+router.get('/organizations/:organizationId/shifttypes', passport.authenticate('jwt-user', { session: false }),  shiftController.listShift);
+router.post('/organizations/:organizationId/shift/Delete', passport.authenticate('jwt-user', { session: false }), shiftController.Delete);
 
 
 

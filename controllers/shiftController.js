@@ -1,4 +1,4 @@
-const { User, Shift, Organization } = require('../models');
+const { User, Shift } = require('../models');
 const { makeRes, to, filterErrors } = require('../utils/helpers');
 
 /**
@@ -126,9 +126,55 @@ const { makeRes, to, filterErrors } = require('../utils/helpers');
   return res.status(200).send(makeRes('Movement logs retrieved.', { shiftDetails }));
 }
 
+/**
+ * Delete shift using id.
+ * 
+ * @param {Object} req
+ * @param {Object} req.user
+ * @param {Object} req.user.id
+ * @param {Object} req.params
+ * @param {Object} req.params.id
+ * @param {Object} res 
+ */
+ const Delete = async (req, res) => {
+  let err, shift;
+  [err, shift] = await to(Shift.destroy({
+    where: {
+      id: req.body.id
+    },
+    include: [
+      {
+        model: Organization,
+        as: 'organization',
+        attributes: ['name'],
+        required: true,
+        include: [
+          {
+            model: User,
+            as: 'users',
+            attributes: [],
+            where: {
+              id: req.user.id
+            }
+          }
+        ]
+      }
+    ]
+  }));
 
+  if (err) {
+    return res.status(500).send(makeRes('Something went wrong.'));
+  }
+
+  if (!shift) {
+    return res.status(404).send(makeRes('Shift not found.'));
+  }
+
+  return res.status(200).send(makeRes('Employee details deleted.', { shift}));
+}
 
 module.exports = {
   create,
-  listShift
+  listShift,
+  Delete
 };

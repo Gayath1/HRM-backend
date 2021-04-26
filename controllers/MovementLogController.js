@@ -296,8 +296,10 @@ const list = async (req, res) => {
 
   let movementLogs;
   [err, movementLogs] = await to(MovementLog.findAll({
+    
     attributes: ['id', 'deviceId', 'temperature', 'ambientTemperature', 'entry', 'createdAt', 'updatedAt'],
     include: [
+      
       {
         model: Location,
         as: 'location',
@@ -316,13 +318,21 @@ const list = async (req, res) => {
         as: 'status',
         attributes: ['name'],
       },
+    
+  
     ],
     order: [
-      ['updatedAt', 'DESC']
+      [ 
+       
+        
+        'updatedAt', 
+        'DESC'
+      ]
     ]
   }));
 
   if (err) {
+    console.log(err);
     return res.status(500).send(makeRes('Something went wrong.'));
   }
 
