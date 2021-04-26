@@ -35,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     employeeId: DataTypes.INTEGER,
     locationId: DataTypes.INTEGER,
     statusId: DataTypes.INTEGER,
+    shiftName: DataTypes.STRING,
     temperature: DataTypes.DECIMAL(5, 2),
     ambientTemperature: DataTypes.DECIMAL(5, 2),
     entry: DataTypes.BOOLEAN

@@ -85,16 +85,7 @@ const create = async (req, res) => {
     }));
   }
 
-  // Create movementLog
-  let savedMovementLog;
-  [err, savedMovementLog] = await to(MovementLog.create({
-    entry: entry,
-    deviceId: device.id,
-    employeeId: employee.id,
-    locationId: device.locationId,
-    statusId: entry ? await status.id('entered') : await status.id('exited'),
-  }));
-
+  
   // let checkEmployeeType;
   // [err, checkEmployeeType] = await to(EmployeeType.findOne({
   //   attributes: ['id', 'organizationId', 'Employee_type', 'createdAt', 'updatedAt'],
@@ -129,6 +120,16 @@ const create = async (req, res) => {
     return res.status(500).send(makeRes('Something went wrong.'));
   }
   var shitName = checkShift.shiftName;
+
+  let savedMovementLog;
+  [err, savedMovementLog] = await to(MovementLog.create({
+    entry: entry,
+    deviceId: device.id,
+    employeeId: employee.id,
+    locationId: device.locationId,
+    shiftName:shitName,
+    statusId: entry ? await status.id('entered') : await status.id('exited'),
+  }));
 
   //Identify the time difference using the moment library
   var shiftstartTime = moment(checkShift.start_time, ["HH:mm"])
@@ -189,11 +190,12 @@ const create = async (req, res) => {
     allowed: true,
     employee: employee,
     OTLogId: typeof savedOTLog === 'undefined' ? null : savedOtLog.id,
-    ShiftName:shitName ?? null,
+    shiftName:Shift,
     //EmployeeType:'undefined' ? null : EmployeeTypeName,
   }));
 
-
+  // Create movementLog
+  
   //Todo Update review status id with button press
 }
 
@@ -297,7 +299,7 @@ const list = async (req, res) => {
   let movementLogs;
   [err, movementLogs] = await to(MovementLog.findAll({
     
-    attributes: ['id', 'deviceId', 'temperature', 'ambientTemperature', 'entry', 'createdAt', 'updatedAt'],
+    attributes: ['id', 'deviceId', 'temperature', 'ambientTemperature', 'entry', 'createdAt', 'updatedAt','shiftName'],
     include: [
       
       {
